@@ -926,7 +926,7 @@ def add_bank_account():
     return jsonify({'account_id':aid,'bank_name':BANKS[bank_code],'account_number_masked':masked,
         'status':'pending_verification','withdrawal_hold_until':hold.isoformat(),
         'message':f'Bank added. Withdrawals on hold for 48 hours for security.'}), 201
-    @app.route('/api/v1/payouts/bank-accounts/<acid>/verify', methods=['POST'])
+        @app.route('/api/v1/payouts/bank-accounts/<acid>/verify', methods=['POST'])
 @require_auth
 @require_role('creator')
 def verify_bank(acid):
@@ -1546,3 +1546,4 @@ if __name__ == '__main__':
     if cfg.DATABASE_URL:
         run_migrations()
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)), debug=cfg.DEBUG)
+    
