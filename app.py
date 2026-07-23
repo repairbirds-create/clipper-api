@@ -307,7 +307,7 @@ def register():
     for acct_type in ('creator_pending','creator_available','creator_paid'):
         db_exec("INSERT INTO ledger_accounts(account_type,entity_id,entity_type,currency) VALUES(%s,%s,'user','NGN') ON CONFLICT DO NOTHING",
             (acct_type, uid))
-      token = gen_token(48); token_hash = hash_token(token)
+    token = gen_token(48); token_hash = hash_token(token)
     db_exec("INSERT INTO email_verifications(user_id,token_hash,token_type,expires_at) VALUES(%s,%s,'email_verification',NOW()+INTERVAL '24 hours')",
         (uid, token_hash))
 
