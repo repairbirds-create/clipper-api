@@ -307,6 +307,7 @@ def register():
     for acct_type in ('creator_pending','creator_available','creator_paid'):
         db_exec("INSERT INTO ledger_accounts(account_type,entity_id,entity_type,currency) VALUES(%s,%s,'user','NGN') ON CONFLICT DO NOTHING",
             (acct_type, uid))
+
     token = gen_token(48); token_hash = hash_token(token)
     db_exec("INSERT INTO email_verifications(user_id,token_hash,token_type,expires_at) VALUES(%s,%s,'email_verification',NOW()+INTERVAL '24 hours')",
         (uid, token_hash))
@@ -617,7 +618,7 @@ def get_campaign(cid):
     if not c: return jsonify({'error':'not_found'}), 404
     u = current_user()
     if c['status'] not in ('active','completed','budget_exhausted'):
-      if not u or u['role'] not in ('super_admin','moderator','finance_admin','support_agent'):
+        if not u or u['role'] not in ('super_admin','moderator','finance_admin','support_agent'):
             return jsonify({'error':'not_found'}), 404
     assets = db_fetch("SELECT id,asset_type,file_name,file_url,description FROM campaign_assets WHERE campaign_id=%s", (cid,))
     r = dict(c)
@@ -925,8 +926,7 @@ def add_bank_account():
     return jsonify({'account_id':aid,'bank_name':BANKS[bank_code],'account_number_masked':masked,
         'status':'pending_verification','withdrawal_hold_until':hold.isoformat(),
         'message':f'Bank added. Withdrawals on hold for 48 hours for security.'}), 201
-
-@app.route('/api/v1/payouts/bank-accounts/<acid>/verify', methods=['POST'])
+    @app.route('/api/v1/payouts/bank-accounts/<acid>/verify', methods=['POST'])
 @require_auth
 @require_role('creator')
 def verify_bank(acid):
@@ -1237,7 +1237,7 @@ def dev_simulate(txn_id):
     if not cfg.DEBUG: return jsonify({'error':'not_found'}), 404
     txn = db_one("SELECT * FROM campaign_funding_transactions WHERE id=%s", (txn_id,))
     if not txn: return jsonify({'error':'not_found'}), 404
-      if txn['status'] != 'initiated': return jsonify({'message':f'Already {txn["status"]}','status':txn['status']})
+    if txn['status'] != 'initiated': return jsonify({'message':f'Already {txn["status"]}','status':txn['status']})
     db_exec("UPDATE campaign_funding_transactions SET status='successful' WHERE id=%s", (txn_id,))
     db_exec("UPDATE campaigns SET funded_amount_kobo=funded_amount_kobo+%s,creator_payout_pool_kobo=creator_payout_pool_kobo+%s,platform_fee_kobo=platform_fee_kobo+%s,status=CASE WHEN status='awaiting_funding' THEN 'active' ELSE status END WHERE id=%s",
         (txn['amount_kobo'], txn['creator_pool_kobo'], txn['platform_fee_kobo'], txn['campaign_id']))
